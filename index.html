@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101827">
+<title>Phone Stock Pro</title>
+<style>
+:root{--bg:#0b1220;--panel:#121d2e;--panel2:#19263a;--text:#edf3fb;--muted:#a6b4c8;--line:#2b3a50;--accent:#58c4a7;--danger:#ff7777;--warn:#ffd166}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px system-ui,-apple-system,"Noto Sans Myanmar",sans-serif}button,input,select{font:inherit}button{border:0;border-radius:10px;padding:11px 14px;background:var(--accent);color:#06251d;font-weight:700;cursor:pointer}button.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line)}button.danger{background:#5c2932;color:#ffe7e7}button:disabled{opacity:.5;cursor:not-allowed}.wrap{max-width:1100px;margin:auto;padding:16px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.top h1{font-size:22px;margin:0}.sub{color:var(--muted);font-size:13px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}.hidden{display:none!important}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field label{font-size:13px;color:var(--muted)}input,select{width:100%;min-width:0;background:#0b1423;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:11px}input:focus,select:focus{outline:2px solid #58c4a766;border-color:var(--accent)}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.tabs{display:flex;gap:8px;overflow:auto;margin-bottom:14px}.tabs button{white-space:nowrap}.tabs .active{background:var(--accent);color:#06251d}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.stat{background:var(--panel2);padding:12px;border-radius:12px}.stat strong{display:block;font-size:20px;margin-top:5px;overflow-wrap:anywhere}.stat span{font-size:12px;color:var(--muted)}.tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:700px}th,td{text-align:left;padding:11px 9px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-size:12px}td .actions{margin:0}.pill{display:inline-block;border-radius:20px;padding:3px 8px;font-size:12px;background:#1f4b42;color:#9ef1d8}.pill.sold{background:#53313a;color:#ffc1c8}.note{color:var(--muted);font-size:13px;line-height:1.6}.error{color:var(--muted);white-space:pre-wrap}.ok{color:#8fe4c8}.sectionhead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}.sectionhead h2{font-size:18px;margin:0}.empty{text-align:center;color:var(--muted);padding:25px}.money{white-space:nowrap}.dangertext{color:var(--danger)}@media(min-width:700px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.field.wide{grid-column:span 2}}@media(max-width:450px){.wrap{padding:10px}.panel{padding:12px}.stats{grid-template-columns:1fr 1fr}.top h1{font-size:19px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><div><h1>📱 Phone Stock Pro</h1><div class="sub">Stock · Sale · Daily Report</div></div><div id="userArea" class="hidden"><div id="userEmail" class="sub"></div><button id="signOutBtn" class="secondary">Sign Out</button></div></header>
+
+
+
+  <section id="authPanel" class="panel">
+    <h2 id="authTitle">Sign In</h2>
+    <div class="grid">
+      <div class="field wide"><label for="authEmail">Email</label><input id="authEmail" type="email" autocomplete="username" placeholder="you@example.com"></div>
+      <div class="field wide"><label for="authPassword">Password</label><input id="authPassword" type="password" autocomplete="current-password" placeholder="Password (အနည်းဆုံး 6 လုံး)"></div>
+    </div>
+    <div class="actions"><button id="signInBtn">Sign In</button><button id="createAccountBtn" class="secondary">Create Account</button></div>
+    <p id="authMessage" class="note"></p>
+  </section>
+
+  <main id="app" class="hidden">
+    <section class="stats panel">
+      <div class="stat"><span>လက်ကျန်ဖုန်း</span><strong id="stockCount">0</strong></div>
+      <div class="stat"><span>ဒီနေ့ အရောင်းအရေအတွက်</span><strong id="todayCount">0</strong></div>
+      <div class="stat"><span>ဒီနေ့ အရောင်းစုစုပေါင်း</span><strong id="todayTotal">0 Ks</strong></div>
+    </section>
+    <nav class="tabs">
+      <button class="active" data-tab="stockView">Stock</button>
+      <button class="secondary" data-tab="saleView">Sale / Out</button>
+      <button class="secondary" data-tab="reportView">Daily Report</button>
+    </nav>
+
+    <section id="stockView">
+      <div class="panel">
+        <div class="sectionhead"><h2 id="formTitle">ဖုန်းအသစ်ထည့်ရန်</h2><button id="resetFormBtn" class="secondary">Clear</button></div>
+        <form id="phoneForm">
+          <input type="hidden" id="editId">
+          <div class="grid">
+            <div class="field"><label for="model">Model *</label><input id="model" required maxlength="100" placeholder="ဥပမာ iPhone 15 Pro"></div>
+            <div class="field"><label for="ramrom">RAM / ROM</label><input id="ramrom" maxlength="60" placeholder="ဥပမာ 8GB / 256GB"></div>
+            <div class="field"><label for="imei">IMEI *</label><input id="imei" required maxlength="40" placeholder="IMEI နံပါတ်" inputmode="numeric"></div>
+            <div class="field"><label for="price">ရောင်းဈေး (Ks) *</label><input id="price" required type="number" min="0" step="1" inputmode="numeric" placeholder="ရောင်းဈေး"></div>
+          </div>
+          <div class="actions"><button type="submit" id="savePhoneBtn">ဖုန်းထည့်မယ်</button></div>
+          <p id="phoneMessage" class="note"></p>
+        </form>
+      </div>
+      <div class="panel">
+        <div class="sectionhead"><h2>Stock စာရင်း</h2><div style="min-width:170px;flex:1;max-width:330px"><input id="searchInput" placeholder="Model / RAM / ROM / IMEI ရှာရန်"></div></div>
+        <div class="tablewrap"><table><thead><tr><th>Model</th><th>RAM / ROM</th><th>IMEI</th><th>ရောင်းဈေး</th><th>အခြေအနေ</th><th>လုပ်ဆောင်ချက်</th></tr></thead><tbody id="stockBody"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody></table></div>
+      </div>
+    </section>
+
+    <section id="saleView" class="hidden">
+      <div class="panel"><div class="sectionhead"><h2>ရောင်းချရန်</h2></div>
+        <p class="note">Stock ထဲက ဖုန်းကိုရွေးပြီး Sale လုပ်ပါ။ Sale လုပ်ပြီးသွားရင် ဖုန်းကို ရောင်းပြီးသားအဖြစ် မှတ်သားကာ အရောင်းစာရင်းထဲ ထည့်ပါမယ်။</p>
+        <div class="grid"><div class="field wide"><label for="salePhone">ဖုန်းရွေးရန်</label><select id="salePhone"><option value="">-- Stock ထဲက ဖုန်းရွေးပါ --</option></select></div><div class="field"><label for="saleDate">ရောင်းချသည့်ရက်</label><input id="saleDate" type="date"></div></div>
+        <div class="actions"><button id="sellBtn">Sale / Out</button></div><p id="saleMessage" class="note"></p>
+      </div>
+      <div class="panel"><h2>မကြာသေးမီ အရောင်းများ</h2><div class="tablewrap"><table><thead><tr><th>ရက်စွဲ</th><th>Model</th><th>IMEI</th><th>ရောင်းဈေး</th></tr></thead><tbody id="recentSalesBody"></tbody></table></div></div>
+    </section>
+
+    <section id="reportView" class="hidden">
+      <div class="panel"><div class="sectionhead"><h2>နေ့စဉ်အရောင်းစာရင်း</h2></div>
+        <div class="grid"><div class="field"><label for="reportDate">ရက်စွဲရွေးရန်</label><input id="reportDate" type="date"></div><div class="field"><label>အရောင်းအရေအတွက်</label><input id="reportCount" readonly value="0"></div><div class="field"><label>စုစုပေါင်းရောင်းဈေး</label><input id="reportTotal" readonly value="0 Ks"></div></div>
+        <div class="tablewrap" style="margin-top:12px"><table><thead><tr><th>အချိန်</th><th>Model</th><th>RAM / ROM</th><th>IMEI</th><th>ရောင်းဈေး</th></tr></thead><tbody id="reportBody"></tbody></table></div>
+      </div>
+    </section>
+  </main>
+  <p id="globalMessage" class="note"></p>
+</div>
+
+<script>
+window.addEventListener("unhandledrejection", function(event) {
+  const el = document.getElementById("authMessage");
+  if (el && !el.textContent) el.textContent = "Firebase ချိတ်ဆက်မှု အမှားရှိပါတယ်။ Page ကို Refresh လုပ်ပြီး ပြန်စမ်းပါ။";
+});
+window.addEventListener("error", function() {
+  const el = document.getElementById("authMessage");
+  if (el && !el.textContent) el.textContent = "App script မတင်နိုင်ပါ။ Chrome မှာ ပြန်ဖွင့်ပါ။";
+});
+</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp, runTransaction, getDocs } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+/* Replace every placeholder below with values from Firebase Console.
+   Keep the quotes and commas. Never paste service-account private keys here. */
+const firebaseConfig = {
+  apiKey: "AIzaSyCiUKoGvwOjCgyZiEpKex0KJz-FVWdtQO0",
+  authDomain: "phone-stock-pro-546e3.firebaseapp.com",
+  projectId: "phone-stock-pro-546e3",
+  storageBucket: "phone-stock-pro-546e3.firebasestorage.app",
+  messagingSenderId: "762633464146",
+  appId: "1:762633464146:web:9f7f1c76f82ca89879328b"
+};
+
+const $ = id => document.getElementById(id);
+const money = n => new Intl.NumberFormat("en-US").format(Number(n)||0) + " Ks";
+const todayKey = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+};
+const dateKey = value => {
+  if (!value) return "";
+  const d = value?.toDate ? value.toDate() : (value instanceof Date ? value : new Date(value));
+  if (Number.isNaN(d.getTime())) return "";
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+};
+const fmtTime = value => {
+  if (!value) return "—";
+  const d = value?.toDate ? value.toDate() : new Date(value);
+  return Number.isNaN(d.getTime()) ? "—" : d.toLocaleTimeString();
+};
+const escapeHtml = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let app, auth, db, phones = [], sales = [], unsubPhones = null, unsubSales = null, activeTab = "stockView";
+
+const configIncomplete = Object.values(firebaseConfig).some(v => !v || v.startsWith("PASTE_"));
+if (configIncomplete) {
+  $("authPanel").classList.add("hidden");
+  $("authMessage").textContent = "firebaseConfig ကို အရင်ဖြည့်ပါ။";
+  $("globalMessage").innerHTML = '<span class="error">Firebase Config မဖြည့်ရသေးပါ။ ဒီဖိုင်ထဲက firebaseConfig ကိုရှာပြီး ကိုယ့်တန်ဖိုးအစစ်တွေနဲ့ အစားထိုးပါ။</span>';
+} else {
+  try {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+    $("authPanel").classList.remove("hidden");
+    $("authMessage").textContent = "";
+  } catch (e) {
+    $("authMessage").textContent = "Firebase စတင်ဖွင့်မရပါ: " + e.message;
+  }
+}
+
+function message(id, text, isError=false) {
+  $(id).textContent = text;
+  $(id).className = isError ? "note error" : "note ok";
+}
+$("signInBtn").addEventListener("click", async () => {
+  if (!auth) return;
+  try { await signInWithEmailAndPassword(auth, $("authEmail").value.trim(), $("authPassword").value); message("authMessage","Login အောင်မြင်ပါတယ်။"); }
+  catch(e) { message("authMessage", friendlyAuthError(e), true); }
+});
+$("createAccountBtn").addEventListener("click", async () => {
+  const btn = $("createAccountBtn");
+  if (!auth) {
+    message("authMessage", "Firebase မချိတ်ဆက်နိုင်ပါ။ Page ကို refresh လုပ်ပြီး Config စစ်ပါ။", true);
+    return;
+  }
+  const email = $("authEmail").value.trim();
+  const password = $("authPassword").value;
+  if (!email) return message("authMessage", "Email ထည့်ပါ။", true);
+  if (!password) return message("authMessage", "Password ထည့်ပါ။", true);
+  btn.disabled = true;
+  btn.textContent = "ခဏစောင့်ပါ…";
+  message("authMessage", "");
+  let timeoutId;
+  try {
+    const createPromise = createUserWithEmailAndPassword(auth, email, password);
+    const timeoutPromise = new Promise((_, reject) => {
+      timeoutId = setTimeout(() => reject(Object.assign(new Error("တုံ့ပြန်မှုမရသေးပါ။ Internet နဲ့ Firebase Authorized domains ကို စစ်ပါ။"), { code: "auth/request-timeout" })), 15000);
+    });
+    await Promise.race([createPromise, timeoutPromise]);
+    message("authMessage", "အကောင့်ဖန်တီးပြီးပါပြီ။");
+  } catch(e) {
+    console.error("Create Account Error:", e);
+    message("authMessage", friendlyAuthError(e), true);
+  } finally {
+    clearTimeout(timeoutId);
+    btn.disabled = false;
+    btn.textContent = "Create Account";
+  }
+});
+$("signOutBtn").addEventListener("click", async () => { try { await signOut(auth); } catch(e) { $("globalMessage").textContent = e.message; } });
+function friendlyAuthError(e) {
+  const map = {
+    "auth/invalid-email":"Email ပုံစံမမှန်ပါ။",
+    "auth/missing-password":"Password ထည့်ပါ။",
+    "auth/weak-password":"Password အနည်းဆုံး 6 လုံးထားပါ။",
+    "auth/email-already-in-use":"ဒီ Email နဲ့ account ရှိပြီးသားပါ။ Sign In လုပ်ပါ။",
+    "auth/invalid-credential":"Email သို့မဟုတ် Password မှားနေပါတယ်။",
+    "auth/operation-not-allowed":"Firebase Authentication ထဲက Email/Password ကို Enable လုပ်ပါ။",
+    "auth/network-request-failed":"Internet connection စစ်ပါ။",
+    "auth/unauthorized-domain":"Firebase Authentication → Settings → Authorized domains မှာ Website domain ထည့်ပါ။",
+    "auth/invalid-api-key":"Firebase Config ထဲက apiKey ကို စစ်ပါ။",
+    "auth/too-many-requests":"ကြိုးစားမှုများလွန်းပါတယ်။ ခဏစောင့်ပြီး ပြန်စမ်းပါ။",
+    "auth/internal-error":"Firebase ဘက်မှာ Error ဖြစ်ပါတယ်။ ခဏနောက် ပြန်စမ်းပါ။",
+    "auth/request-timeout":"Firebase ချိတ်ဆက်မှု မအောင်မြင်ပါ။ HTTPS Website ကနေ ပြန်ဖွင့်ပါ။"
+  };
+  return map[e.code] || `${e.code || "Error"}: ${e.message}`;
+}
+onAuthStateChanged(auth || { onAuthStateChanged: ()=>{} }, user => {
+  if (!auth) return;
+  if (unsubPhones) unsubPhones();
+  if (unsubSales) unsubSales();
+  unsubPhones = unsubSales = null;
+  $("app").classList.toggle("hidden", !user);
+  $("userArea").classList.toggle("hidden", !user);
+  $("authPanel").classList.toggle("hidden", !!user);
+  if (!user) { phones=[]; sales=[]; renderAll(); return; }
+  $("userEmail").textContent = user.email || "Signed in";
+  unsubPhones = onSnapshot(query(collection(db,"phones"), orderBy("createdAt","desc")), snap => {
+    phones = snap.docs.map(d => ({id:d.id,...d.data()}));
+    renderAll();
+  }, e => message("globalMessage","Phones ဖတ်မရပါ: "+e.message,true));
+  unsubSales = onSnapshot(query(collection(db,"sales"), orderBy("soldAt","desc")), snap => {
+    sales = snap.docs.map(d => ({id:d.id,...d.data()}));
+    renderAll();
+  }, e => message("globalMessage","Sales ဖတ်မရပါ: "+e.message,true));
+});
+
+$("phoneForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (!auth?.currentUser) return message("phoneMessage","အရင် Login ဝင်ပါ။",true);
+  const model = $("model").value.trim(), ramrom = $("ramrom").value.trim(), imei = $("imei").value.trim(), price = Number($("price").value), id = $("editId").value;
+  if (!model || !imei || !Number.isFinite(price) || price < 0) return message("phoneMessage","Model၊ IMEI နဲ့ မှန်ကန်တဲ့ ရောင်းဈေး ဖြည့်ပါ။",true);
+  const duplicate = phones.find(p => p.imei === imei && p.id !== id);
+  if (duplicate) return message("phoneMessage","ဒီ IMEI နံပါတ်ကို Stock ထဲမှာ အသုံးပြုပြီးသားပါ။",true);
+  try {
+    if (id) await updateDoc(doc(db,"phones",id), {model,ramrom,imei,price,updatedAt:serverTimestamp()});
+    else await addDoc(collection(db,"phones"), {model,ramrom,imei,price,status:"stock",createdAt:serverTimestamp(),createdBy:auth.currentUser.uid});
+    resetForm(); message("phoneMessage",id ? "ဖုန်းအချက်အလက် ပြင်ပြီးပါပြီ။" : "ဖုန်းအသစ် ထည့်ပြီးပါပြီ။");
+  } catch(err) { message("phoneMessage","သိမ်းမရပါ: "+err.message,true); }
+});
+function resetForm() { $("phoneForm").reset(); $("editId").value=""; $("formTitle").textContent="ဖုန်းအသစ်ထည့်ရန်"; $("savePhoneBtn").textContent="ဖုန်းထည့်မယ်"; }
+$("resetFormBtn").addEventListener("click",resetForm);
+$("searchInput").addEventListener("input",renderStock);
+function renderStock() {
+  const term=$("searchInput").value.trim().toLowerCase();
+  const rows=phones.filter(p=>[p.model,p.ramrom,p.imei].some(v=>String(v||"").toLowerCase().includes(term)));
+  $("stockBody").innerHTML = rows.length ? rows.map(p=>`<tr>
+    <td>${escapeHtml(p.model)}</td><td>${escapeHtml(p.ramrom||"—")}</td><td>${escapeHtml(p.imei)}</td><td class="money">${money(p.price)}</td>
+    <td><span class="pill ${p.status==="sold"?"sold":""}">${p.status==="sold"?"ရောင်းပြီး":"Stock"}</span></td>
+    <td><div class="actions"><button class="secondary" data-edit="${p.id}">Edit</button><button class="danger" data-delete="${p.id}">Delete</button></div></td></tr>`).join("") : '<tr><td colspan="6" class="empty">စာရင်းမရှိသေးပါ</td></tr>';
+  $("stockBody").querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>editPhone(b.dataset.edit)));
+  $("stockBody").querySelectorAll("[data-delete]").forEach(b=>b.addEventListener("click",()=>removePhone(b.dataset.delete)));
+}
+function editPhone(id) {
+  const p=phones.find(x=>x.id===id); if(!p)return;
+  if(p.status==="sold") return message("phoneMessage","ရောင်းပြီးသားဖုန်းကို ဒီနေရာကနေ မပြင်နိုင်ပါ။",true);
+  $("editId").value=p.id; $("model").value=p.model||""; $("ramrom").value=p.ramrom||""; $("imei").value=p.imei||""; $("price").value=p.price??"";
+  $("formTitle").textContent="ဖုန်းအချက်အလက် ပြင်ရန်"; $("savePhoneBtn").textContent="ပြင်ဆင်ချက် သိမ်းမယ်";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+async function removePhone(id) {
+  const p=phones.find(x=>x.id===id); if(!p)return;
+  if(p.status==="sold") return message("phoneMessage","ရောင်းပြီးသားဖုန်းကို ဖျက်လို့မရပါ။",true);
+  if(!confirm(`${p.model} (${p.imei}) ကို ဖျက်မှာ သေချာပါသလား?`)) return;
+  try { await deleteDoc(doc(db,"phones",id)); message("phoneMessage","ဖျက်ပြီးပါပြီ။"); }
+  catch(e) { message("phoneMessage","ဖျက်မရပါ: "+e.message,true); }
+}
+$("sellBtn").addEventListener("click", async () => {
+  const id=$("salePhone").value, date=$("saleDate").value || todayKey();
+  if(!id) return message("saleMessage","ရောင်းမယ့် Stock ဖုန်းကို ရွေးပါ။",true);
+  const p=phones.find(x=>x.id===id); if(!p || p.status!=="stock") return message("saleMessage","ဒီဖုန်းက Stock ထဲမှာ မရှိတော့ပါ။",true);
+  if(!confirm(`${p.model}\nIMEI: ${p.imei}\nရောင်းဈေး: ${money(p.price)}\nရောင်းချမှာ သေချာပါသလား?`)) return;
+  try {
+    await runTransaction(db, async tx => {
+      const ref=doc(db,"phones",id), snap=await tx.get(ref);
+      if(!snap.exists() || snap.data().status!=="stock") throw new Error("ဒီဖုန်းကို အခြားသူက ရောင်းပြီးသွားပါပြီ။");
+      tx.update(ref,{status:"sold",soldAt:serverTimestamp(),soldDate:date,soldBy:auth.currentUser.uid});
+      const saleRef=doc(collection(db,"sales"));
+      tx.set(saleRef,{phoneId:id,model:p.model,ramrom:p.ramrom||"",imei:p.imei,price:Number(p.price),soldDate:date,soldAt:serverTimestamp(),soldBy:auth.currentUser.uid});
+    });
+    message("saleMessage","ရောင်းချမှု သိမ်းပြီးပါပြီ။");
+  } catch(e) { message("saleMessage","Sale မအောင်မြင်ပါ: "+e.message,true); }
+});
+$("saleDate").value=todayKey();
+$("reportDate").value=todayKey();
+$("reportDate").addEventListener("change",renderReport);
+function renderSales() {
+  const available=phones.filter(p=>p.status==="stock");
+  $("salePhone").innerHTML='<option value="">-- Stock ထဲက ဖုန်းရွေးပါ --</option>'+available.map(p=>`<option value="${p.id}">${escapeHtml(p.model)} · ${escapeHtml(p.ramrom||"")} · ${escapeHtml(p.imei)} · ${money(p.price)}</option>`).join("");
+  const recent=sales.slice(0,10);
+  $("recentSalesBody").innerHTML=recent.length?recent.map(s=>`<tr><td>${escapeHtml(s.soldDate||dateKey(s.soldAt))}</td><td>${escapeHtml(s.model)}</td><td>${escapeHtml(s.imei)}</td><td class="money">${money(s.price)}</td></tr>`).join(""):'<tr><td colspan="4" class="empty">အရောင်းမရှိသေးပါ</td></tr>';
+}
+function renderReport() {
+  const key=$("reportDate").value||todayKey();
+  const list=sales.filter(s=>(s.soldDate||dateKey(s.soldAt))===key);
+  $("reportCount").value=String(list.length);
+  $("reportTotal").value=money(list.reduce((sum,s)=>sum+Number(s.price||0),0));
+  $("reportBody").innerHTML=list.length?list.map(s=>`<tr><td>${escapeHtml(fmtTime(s.soldAt))}</td><td>${escapeHtml(s.model)}</td><td>${escapeHtml(s.ramrom||"—")}</td><td>${escapeHtml(s.imei)}</td><td class="money">${money(s.price)}</td></tr>`).join(""):'<tr><td colspan="5" class="empty">ဒီရက်အတွက် အရောင်းမရှိပါ</td></tr>';
+}
+function renderStats() {
+  $("stockCount").textContent=String(phones.filter(p=>p.status==="stock").length);
+  const list=sales.filter(s=>(s.soldDate||dateKey(s.soldAt))===todayKey());
+  $("todayCount").textContent=String(list.length);
+  $("todayTotal").textContent=money(list.reduce((sum,s)=>sum+Number(s.price||0),0));
+}
+function renderAll(){renderStock();renderSales();renderReport();renderStats();}
+document.querySelectorAll("[data-tab]").forEach(btn=>btn.addEventListener("click",()=>{
+  activeTab=btn.dataset.tab;
+  document.querySelectorAll("[data-tab]").forEach(b=>{const active=b.dataset.tab===activeTab;b.classList.toggle("active",active);b.classList.toggle("secondary",!active);});
+  ["stockView","saleView","reportView"].forEach(id=>$(id).classList.toggle("hidden",id!==activeTab));
+}));
+</script>
+</body>
+</html>
