@@ -62,7 +62,7 @@
     <section id="saleView" class="hidden">
       <div class="panel"><div class="sectionhead"><h2>ရောင်းချရန်</h2></div>
         <p class="note">Stock ထဲက ဖုန်းကိုရွေးပြီး Sale လုပ်ပါ။ Sale လုပ်ပြီးသွားရင် ဖုန်းကို ရောင်းပြီးသားအဖြစ် မှတ်သားကာ အရောင်းစာရင်းထဲ ထည့်ပါမယ်။</p>
-        <div class="grid"><div class="field wide"><label for="salePhone">ဖုန်းရွေးရန်</label><select id="salePhone"><option value="">-- Stock ထဲက ဖုန်းရွေးပါ --</option></select></div><div class="field"><label for="saleDate">ရောင်းချသည့်ရက်</label><input id="saleDate" type="date"></div></div>
+        <div class="grid"><div class="field wide"><label for="salePhone">ဖုန်းရွေးရန်</label><select id="salePhone"><option value="">-- Stock ထဲက ဖုန်းရွေးပါ --</option></select></div><div class="field"><label for="salePrice">တကယ်ရောင်းဈေး (Ks) *</label><input id="salePrice" type="number" min="0" step="1" inputmode="numeric" placeholder="တကယ်ရောင်းလိုက်တဲ့ဈေး"></div><div class="field"><label for="saleDate">ရောင်းချသည့်ရက်</label><input id="saleDate" type="date"></div></div>
         <div class="actions"><button id="sellBtn">Sale / Out</button></div><p id="saleMessage" class="note"></p>
       </div>
       <div class="panel"><h2>မကြာသေးမီ အရောင်းများ</h2><div class="tablewrap"><table><thead><tr><th>ရက်စွဲ</th><th>Model</th><th>IMEI</th><th>ရောင်းဈေး</th></tr></thead><tbody id="recentSalesBody"></tbody></table></div></div>
@@ -258,50 +258,30 @@ async function removePhone(id) {
   try { await deleteDoc(doc(db,"phones",id)); message("phoneMessage","ဖျက်ပြီးပါပြီ။"); }
   catch(e) { message("phoneMessage","ဖျက်မရပါ: "+e.message,true); }
 }
+$("salePhone").addEventListener("change", () => {
+  const p = phones.find(x => x.id === $("salePhone").value);
+  // ဖုန်းရွေးလိုက်တာနဲ့ Stock ဈေးကို အစပိုင်းတန်ဖိုးအဖြစ် ထည့်ပေးမယ်။ လိုသလိုပြင်နိုင်တယ်။
+  $("salePrice").value = p ? Number(p.price ?? 0) : "";
+});
+
 $("sellBtn").addEventListener("click", async () => {
-  const id=$("salePhone").value, date=$("saleDate").value || todayKey();
-  if(!id) return message("saleMessage","ရောင်းမယ့် Stock ဖုန်းကို ရွေးပါ။",true);
-  const p=phones.find(x=>x.id===id); if(!p || p.status!=="stock") return message("saleMessage","ဒီဖုန်းက Stock ထဲမှာ မရှိတော့ပါ။",true);
-  if(!confirm(`${p.model}\nIMEI: ${p.imei}\nရောင်းဈေး: ${money(p.price)}\nရောင်းချမှာ သေချာပါသလား?`)) return;
+  const id = $("salePhone").value;
+  const date = $("saleDate").value || todayKey();
+  const rawSalePrice = $("salePrice").value.trim();
+  const salePrice = Number(rawSalePrice);
+  if (!id) return message("saleMessage", "ရောင်းမယ့် Stock ဖုန်းကို ရွေးပါ။", true);
+  if (rawSalePrice === "" || !Number.isFinite(salePrice) || salePrice < 0)
+    return message("saleMessage", "တကယ်ရောင်းလိုက်တဲ့ဈေးကို မှန်မှန်ကန်ကန် ထည့်ပါ။", true);
+  const p = phones.find(x => x.id === id);
+  if (!p || p.status !== "stock") return message("saleMessage", "ဒီဖုန်းက Stock ထဲမှာ မရှိတော့ပါ။", true);
+  if (!auth?.currentUser) return message("saleMessage", "အရင် Login ဝင်ပါ။", true);
+  if (!confirm(`${p.model}\nIMEI: ${p.imei}\nဆိုင်သတ်မှတ်ဈေး: ${money(p.price)}\nတကယ်ရောင်းဈေး: ${money(salePrice)}\n\nရောင်းချမှာ သေချာပါသလား?`)) return;
+  const btn = $("sellBtn");
+  btn.disabled = true;
   try {
     await runTransaction(db, async tx => {
-      const ref=doc(db,"phones",id), snap=await tx.get(ref);
-      if(!snap.exists() || snap.data().status!=="stock") throw new Error("ဒီဖုန်းကို အခြားသူက ရောင်းပြီးသွားပါပြီ။");
-      tx.update(ref,{status:"sold",soldAt:serverTimestamp(),soldDate:date,soldBy:auth.currentUser.uid});
-      const saleRef=doc(collection(db,"sales"));
-      tx.set(saleRef,{phoneId:id,model:p.model,ramrom:p.ramrom||"",imei:p.imei,price:Number(p.price),soldDate:date,soldAt:serverTimestamp(),soldBy:auth.currentUser.uid});
-    });
-    message("saleMessage","ရောင်းချမှု သိမ်းပြီးပါပြီ။");
-  } catch(e) { message("saleMessage","Sale မအောင်မြင်ပါ: "+e.message,true); }
-});
-$("saleDate").value=todayKey();
-$("reportDate").value=todayKey();
-$("reportDate").addEventListener("change",renderReport);
-function renderSales() {
-  const available=phones.filter(p=>p.status==="stock");
-  $("salePhone").innerHTML='<option value="">-- Stock ထဲက ဖုန်းရွေးပါ --</option>'+available.map(p=>`<option value="${p.id}">${escapeHtml(p.model)} · ${escapeHtml(p.ramrom||"")} · ${escapeHtml(p.imei)} · ${money(p.price)}</option>`).join("");
-  const recent=sales.slice(0,10);
-  $("recentSalesBody").innerHTML=recent.length?recent.map(s=>`<tr><td>${escapeHtml(s.soldDate||dateKey(s.soldAt))}</td><td>${escapeHtml(s.model)}</td><td>${escapeHtml(s.imei)}</td><td class="money">${money(s.price)}</td></tr>`).join(""):'<tr><td colspan="4" class="empty">အရောင်းမရှိသေးပါ</td></tr>';
-}
-function renderReport() {
-  const key=$("reportDate").value||todayKey();
-  const list=sales.filter(s=>(s.soldDate||dateKey(s.soldAt))===key);
-  $("reportCount").value=String(list.length);
-  $("reportTotal").value=money(list.reduce((sum,s)=>sum+Number(s.price||0),0));
-  $("reportBody").innerHTML=list.length?list.map(s=>`<tr><td>${escapeHtml(fmtTime(s.soldAt))}</td><td>${escapeHtml(s.model)}</td><td>${escapeHtml(s.ramrom||"—")}</td><td>${escapeHtml(s.imei)}</td><td class="money">${money(s.price)}</td></tr>`).join(""):'<tr><td colspan="5" class="empty">ဒီရက်အတွက် အရောင်းမရှိပါ</td></tr>';
-}
-function renderStats() {
-  $("stockCount").textContent=String(phones.filter(p=>p.status==="stock").length);
-  const list=sales.filter(s=>(s.soldDate||dateKey(s.soldAt))===todayKey());
-  $("todayCount").textContent=String(list.length);
-  $("todayTotal").textContent=money(list.reduce((sum,s)=>sum+Number(s.price||0),0));
-}
-function renderAll(){renderStock();renderSales();renderReport();renderStats();}
-document.querySelectorAll("[data-tab]").forEach(btn=>btn.addEventListener("click",()=>{
-  activeTab=btn.dataset.tab;
-  document.querySelectorAll("[data-tab]").forEach(b=>{const active=b.dataset.tab===activeTab;b.classList.toggle("active",active);b.classList.toggle("secondary",!active);});
-  ["stockView","saleView","reportView"].forEach(id=>$(id).classList.toggle("hidden",id!==activeTab));
-}));
-</script>
-</body>
-</html>
+      const ref = doc(db, "phones", id);
+      const snap = await tx.get(ref);
+      if (!snap.exists() || snap.data().status !== "stock") throw new Error("ဒီဖုန်းကို အခြားသူက ရောင်းပြီးသွားပါပြီ။");
+      const phoneData = snap.data();
+      tx.update(ref, {status:"sold", soldAt:serverTimestamp(), soldDate:date, soldBy:auth.currentUser.
