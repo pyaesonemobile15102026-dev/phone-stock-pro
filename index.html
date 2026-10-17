@@ -418,5 +418,23 @@ document.querySelectorAll("[data-tab]").forEach(btn => btn.addEventListener("cli
   tick();
 })();
 </script>
+  
+<audio id="welcomeAudio" preload="auto">
+  <source src="./welcome-phone-stock-pro.wav" type="audio/wav">
+</audio>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const audio = document.getElementById("welcomeAudio");
+
+  document.addEventListener("click", () => {
+    audio.currentTime = 0;
+    audio.play().catch(error => {
+      console.log("Audio error:", error);
+    });
+  }, { once: true });
+});
+</script>
+  
 </body>
 </html>
