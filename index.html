@@ -394,47 +394,24 @@ document.querySelectorAll("[data-tab]").forEach(btn => btn.addEventListener("cli
 }));
 </script>
 
-<audio id="startupAudio" preload="auto" src="./welcome-phone-stock-pro.wav"></audio>
-<script>
-(function(){
-  const splash = document.getElementById('appSplash');
-  if (!splash) return;
-  const duration = 15000;
-  const started = Date.now();
-  const seconds = document.getElementById('splashSeconds');
-  const audio = document.getElementById('startupAudio');
-  let audioPlayed = false;
-  function startupSound(){
-    if(audioPlayed) return; audioPlayed = true;
-    if(audio){ audio.currentTime=0; audio.play().catch(()=>{}); }
-  }
-  splash.addEventListener('pointerdown', startupSound, {once:true});
-  const tick=()=>{
-    const remaining=Math.max(0,Math.ceil((duration-(Date.now()-started))/1000));
-    if(seconds) seconds.textContent=String(remaining);
-    if(Date.now()-started>=duration){splash.classList.add('hide');return;}
-    requestAnimationFrame(tick);
-  };
-  tick();
-})();
-</script>
-  
-<audio id="welcomeAudio" preload="auto">
-  <source src="./welcome-phone-stock-pro.wav" type="audio/wav">
-</audio>
+  <!-- အရင်ရှိပြီးသား မူရင်း Code တွေ -->
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const audio = document.getElementById("welcomeAudio");
+  <!-- ဒီနေရာမှာ Audio Code ထည့်ပါ -->
+  <audio id="welcomeAudio" preload="auto">
+    <source src="./welcome-phone-stock-pro.wav" type="audio/wav">
+  </audio>
 
-  document.addEventListener("click", () => {
-    audio.currentTime = 0;
-    audio.play().catch(error => {
-      console.log("Audio error:", error);
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const audio = document.getElementById("welcomeAudio");
+      document.addEventListener("click", () => {
+        audio.currentTime = 0;
+        audio.play().catch(console.error);
+      }, { once: true });
     });
-  }, { once: true });
-});
-</script>
+  </script>
+
+</body>
   
 </body>
 </html>
