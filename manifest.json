@@ -1,0 +1,13 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Phone Stock Pro",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "Phone Stock",
+  "start_url": "/",
+  "theme_color": "#101827",
+  "description": "Phone Stock Pro Mobile Phone Inventory Management",
+  "lang": "my"
+}
