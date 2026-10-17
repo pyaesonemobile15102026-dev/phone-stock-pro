@@ -3,12 +3,24 @@
   "dir": "ltr",
   "display": "standalone",
   "name": "Phone Stock Pro",
-  "orientation": "any",
-  "scope": "./",
   "short_name": "Phone Stock",
-  "start_url": "./",
-  "theme_color": "#101827",
-  "id": "Phone Stock Pro Mobile Phone Inventory Management",
   "description": "Phone Stock Pro Mobile Phone Inventory Management",
-  "lang": "en"
+  "id": "./",
+  "scope": "./",
+  "start_url": "./",
+  "orientation": "any",
+  "theme_color": "#101827",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "./icons/launchericon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./icons/launchericon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
