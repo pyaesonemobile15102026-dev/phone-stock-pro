@@ -420,11 +420,8 @@ document.querySelectorAll("[data-tab]").forEach(btn => btn.addEventListener("cli
 
       if (audio) {
         audio.currentTime = 0;
-        audio.play().catch(() => {
-          // Browser က autoplay ကို ပိတ်ထားနိုင်ပါတယ်။
-        });
+        audio.play().catch(() => {});
       }
-
       return;
     }
 
