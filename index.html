@@ -400,26 +400,37 @@ document.querySelectorAll("[data-tab]").forEach(btn => btn.addEventListener("cli
 <script>
 (function(){
   const splash = document.getElementById('appSplash');
+  const audio = document.getElementById('startupAudio');
   if (!splash) return;
+
   const duration = 5000;
   const started = Date.now();
   const seconds = document.getElementById('splashSeconds');
-  const audio = document.getElementById('startupAudio');
 
-function startupSound(){
-  if (!audio) return;
-  audio.currentTime = 0;
-  audio.play().catch(() => {});
-}
+  const tick = () => {
+    const remaining = Math.max(
+      0,
+      Math.ceil((duration - (Date.now() - started)) / 1000)
+    );
 
-window.addEventListener('pageshow', () => {
-  startupSound();
-});
-    const remaining=Math.max(0,Math.ceil((duration-(Date.now()-started))/1000));
-    if(seconds) seconds.textContent=String(remaining);
-    if(Date.now()-started>=duration){splash.classList.add('hide');return;}
+    if (seconds) seconds.textContent = String(remaining);
+
+    if (Date.now() - started >= duration) {
+      splash.classList.add('hide');
+
+      if (audio) {
+        audio.currentTime = 0;
+        audio.play().catch(() => {
+          // Browser က autoplay ကို ပိတ်ထားနိုင်ပါတယ်။
+        });
+      }
+
+      return;
+    }
+
     requestAnimationFrame(tick);
   };
+
   tick();
 })();
 </script>
