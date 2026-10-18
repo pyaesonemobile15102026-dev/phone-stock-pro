@@ -278,8 +278,19 @@ $("phoneForm").addEventListener("submit", async e => {
   if (!auth?.currentUser) return message("phoneMessage","အရင် Login ဝင်ပါ။",true);
   const model = $("model").value.trim(), ramrom = $("ramrom").value.trim(), color = $("color").value.trim(), imei = $("imei").value.trim(), price = Number($("price").value), id = $("editId").value;
   if (!model || !imei || !Number.isFinite(price) || price < 0) return message("phoneMessage","Model၊ IMEI နဲ့ မှန်ကန်တဲ့ ရောင်းဈေး ဖြည့်ပါ။",true);
-  const duplicate = phones.find(p => p.imei === imei && p.id !== id);
-  if (duplicate) return message("phoneMessage","ဒီ IMEI နံပါတ်ကို Stock ထဲမှာ အသုံးပြုပြီးသားပါ။",true);
+  const duplicate = phones.find(
+  p => p.imei === imei &&
+       p.id !== id &&
+       p.status === "stock"
+);
+
+if (duplicate) {
+  return message(
+    "phoneMessage",
+    "ဒီဖုန်းက Stock ထဲမှာ ရှိပြီးသားပါ။",
+    true
+  );
+}
   try {
     if (id) await updateDoc(doc(db,"phones",id), {model,ramrom,color,imei,price,ownerUid:auth.currentUser.uid,updatedAt:serverTimestamp()});
     else await addDoc(collection(db,"phones"), {model,ramrom,color,imei,price,status:"stock",createdAt:serverTimestamp(),createdBy:auth.currentUser.uid,ownerUid:auth.currentUser.uid});
