@@ -292,6 +292,7 @@ $("searchInput").addEventListener("input",renderStock);
 function renderStock() {
   const term=$("searchInput").value.trim().toLowerCase();
   const rows=phones.filter(p=>p.status==="stock" && [p.model,p.ramrom,p.color,p.imei].some(v=>String(v||"").toLowerCase().includes(term)));
+  rows.sort((a, b) => Number(b.price || 0) - Number(a.price || 0));
   $("stockBody").innerHTML = rows.length ? rows.map(p=>`<tr>
     <td>${escapeHtml(p.model)}</td><td>${escapeHtml(p.ramrom||"—")}</td><td>${escapeHtml(p.color||"—")}</td><td>${escapeHtml(p.imei)}</td><td class="money">${money(p.price)}</td>
     <td><span class="pill ${p.status==="sold"?"sold":""}">${p.status==="sold"?"ရောင်းပြီး":"Stock"}</span></td>
@@ -404,13 +405,16 @@ document.querySelectorAll("[data-tab]").forEach(btn => btn.addEventListener("cli
   const started = Date.now();
   const seconds = document.getElementById('splashSeconds');
   const audio = document.getElementById('startupAudio');
-  let audioPlayed = false;
-  function startupSound(){
-    if(audioPlayed) return; audioPlayed = true;
-    if(audio){ audio.currentTime=0; audio.play().catch(()=>{}); }
-  }
-  splash.addEventListener('pointerdown', startupSound, {once:true});
-  const tick=()=>{
+
+function startupSound(){
+  if (!audio) return;
+  audio.currentTime = 0;
+  audio.play().catch(() => {});
+}
+
+window.addEventListener('pageshow', () => {
+  startupSound();
+});
     const remaining=Math.max(0,Math.ceil((duration-(Date.now()-started))/1000));
     if(seconds) seconds.textContent=String(remaining);
     if(Date.now()-started>=duration){splash.classList.add('hide');return;}
