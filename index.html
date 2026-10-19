@@ -378,8 +378,61 @@ function renderSales() {
   $("salePhone").innerHTML = '<option value="">-- Stock ထဲက ဖုန်းရွေးပါ --</option>' + filtered.map(p => `<option value="${p.id}">${escapeHtml(p.model)} · ${escapeHtml(p.ramrom || "")} · ${escapeHtml(p.color || "အရောင်မသတ်မှတ်ရသေး") } · ${escapeHtml(p.imei)} · ${money(p.price)}</option>`).join("");
   if (filtered.some(p => p.id === selected)) $("salePhone").value = selected;
   const recent = sales.slice(0, 10);
-  $("recentSalesBody").innerHTML = recent.length ? recent.map(s => `<tr><td>${escapeHtml(s.soldDate || dateKey(s.soldAt))}</td><td>${escapeHtml(s.model)}</td><td>${escapeHtml(s.color || "—")}</td><td>${escapeHtml(s.imei)}</td><td class="money">${money(s.price)}</td></tr>`).join("") : '<tr><td colspan="5" class="empty">အရောင်းမရှိသေးပါ</td></tr>';
+$("recentSalesBody").innerHTML = recent.length ? recent.map(s => `<tr class="sale-history-row" data-sale-id="${escapeHtml(s.id)}"><td>${escapeHtml(s.soldDate || dateKey(s.soldAt))}</td><td>${escapeHtml(s.model)}</td><td>${escapeHtml(s.color || "—")}</td><td>${escapeHtml(s.imei)}</td><td class="money">${money(s.price)}</td></tr>`).join("") : '<tr><td colspan="5" class="empty">အရောင်းမရှိသေးပါ</td></tr>';
 }
+  
+let saleLongPressTimer = null;
+
+$("recentSalesBody").addEventListener("pointerdown", event => {
+  const row = event.target.closest("tr[data-sale-id]");
+  if (!row || event.button === 2) return;
+
+  clearTimeout(saleLongPressTimer);
+
+  saleLongPressTimer = setTimeout(async () => {
+    const sale = sales.find(s => s.id === row.dataset.saleId);
+    if (!sale) return;
+
+    const ok = confirm(
+      `ဒီအရောင်းမှတ်တမ်းကို ဖျက်မှာ သေချာပါသလား?\n\n` +
+      `ဖုန်း: ${sale.model || "—"}\n` +
+      `IMEI: ${sale.imei || "—"}\n\n` +
+      `အရောင်းမှတ်တမ်းပဲ ဖျက်မယ်။ Stock ကို မပြောင်းပါ။`
+    );
+
+    if (!ok) return;
+
+    const user = auth?.currentUser;
+    if (!user || sale.ownerUid !== user.uid) {
+      alert("ဒီအရောင်းမှတ်တမ်းကို ဖျက်ခွင့်မရှိပါ။");
+      return;
+    }
+
+    try {
+      await deleteDoc(doc(db, "sales", sale.id));
+      message(
+        "saleMessage",
+        "အရောင်းမှတ်တမ်း ဖျက်ပြီးပါပြီ။ Stock ကို မပြောင်းထားပါ။"
+      );
+    } catch (e) {
+      message(
+        "saleMessage",
+        "ဖျက်မရပါ: " + (e.message || "အမှား"),
+        true
+      );
+    }
+  }, 1000);
+});
+
+function clearSaleLongPress() {
+  clearTimeout(saleLongPressTimer);
+  saleLongPressTimer = null;
+}
+
+$("recentSalesBody").addEventListener("pointerup", clearSaleLongPress);
+$("recentSalesBody").addEventListener("pointerleave", clearSaleLongPress);
+$("recentSalesBody").addEventListener("pointercancel", clearSaleLongPress);
+
 $("saleSearch").addEventListener("input", renderSales);
 
 function renderReport() {
